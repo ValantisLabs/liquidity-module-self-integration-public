@@ -164,12 +164,11 @@ class ValantisSTEXLiquidityModule(LiquidityModule):
     def get_swap_fee_in_bips_transform(self, fee_in_bips: int) -> int:
         return SafeMath.muldiv(BIPS, fee_in_bips, SafeMath.sub(BIPS, fee_in_bips))
 
-    ## Will change this once we have more pools ;)
-    @staticmethod
-    def convert_to_token_0(amount_token_1: int) -> int:
-        return amount_token_1
+    def convert_to_token_0(amount_token_1: int, pool_state: Dict) -> int:
+        exchange_rate = pool_state['exchange_rate_to_token_0']
+        return amount_token_1 * exchange_rate
     
-    @staticmethod
-    def convert_to_token_1(amount_token_0: int) -> int:
-        return amount_token_0    
+    def convert_to_token_1(amount_token_0: int, pool_state: Dict) -> int:
+        exchange_rate = pool_state['exchange_rate_to_token_1']
+        return amount_token_0 * exchange_rate
 
