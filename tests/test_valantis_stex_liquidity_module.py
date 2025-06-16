@@ -50,7 +50,9 @@ def test_get_amount_out_token0_to_token1(liquidity_module: ValantisSTEXLiquidity
         'num_steps_token_0_fee_curve': 2,
         'amount_0_pending_unstaking': 0,
         'amount_1_pending_lp_withdrawal': 0,
-        'amount_1_lending_pool': 0
+        'amount_1_lending_pool': 0,
+        'exchange_rate_to_token_0': 1,
+        'exchange_rate_to_token_1': 1
     }
 
     # small amount in
@@ -58,28 +60,28 @@ def test_get_amount_out_token0_to_token1(liquidity_module: ValantisSTEXLiquidity
     fee, amount_out = liquidity_module.get_amount_out(pool_state, fixed_parameters, TOKEN_0, TOKEN_1, amount_in)
     feeInBips = (fee * 10000) / amount_in
     assert fee_in_bips_is_close_enough(feeInBips, 5)
-    assert amount_out == liquidity_module.convert_to_token_1(amount_in - fee)
+    assert amount_out == liquidity_module.convert_to_token_1(amount_in - fee, pool_state)
 
     # larger amount in
     amount_in = int(19.9999 * (10 ** 18))
     fee, amount_out = liquidity_module.get_amount_out(pool_state, fixed_parameters, TOKEN_0, TOKEN_1, amount_in)
     feeInBips = (fee * 10000) / amount_in
     assert fee_in_bips_is_close_enough(feeInBips, 5)
-    assert amount_out == liquidity_module.convert_to_token_1(amount_in - fee)
+    assert amount_out == liquidity_module.convert_to_token_1(amount_in - fee, pool_state)
 
     # larger amount in
     amount_in = int(30 * (10 ** 18))
     fee, amount_out = liquidity_module.get_amount_out(pool_state, fixed_parameters, TOKEN_0, TOKEN_1, amount_in)
     feeInBips = (fee * 10000) / amount_in
     assert fee_in_bips_is_close_enough(feeInBips, 10)
-    assert amount_out == liquidity_module.convert_to_token_1(amount_in - fee)
+    assert amount_out == liquidity_module.convert_to_token_1(amount_in - fee, pool_state)
 
     # even larger amount in
     amount_in = int(50 * (10 ** 18))
     fee, amount_out = liquidity_module.get_amount_out(pool_state, fixed_parameters, TOKEN_0, TOKEN_1, amount_in)
     feeInBips = (fee * 10000) / amount_in
     assert fee_in_bips_is_close_enough(feeInBips, 10)
-    assert amount_out == liquidity_module.convert_to_token_1(amount_in - fee)
+    assert amount_out == liquidity_module.convert_to_token_1(amount_in - fee, pool_state)
 
 def test_get_amount_in_token0_to_token1(liquidity_module: ValantisSTEXLiquidityModule, fixed_parameters: Dict):
     """
@@ -94,7 +96,9 @@ def test_get_amount_in_token0_to_token1(liquidity_module: ValantisSTEXLiquidityM
         'num_steps_token_0_fee_curve': 2,
         'amount_0_pending_unstaking': 0,
         'amount_1_pending_lp_withdrawal': 0,
-        'amount_1_lending_pool': 0
+        'amount_1_lending_pool': 0,
+        'exchange_rate_to_token_0': 1,
+        'exchange_rate_to_token_1': 1
     }
 
     # small amount out
@@ -102,28 +106,28 @@ def test_get_amount_in_token0_to_token1(liquidity_module: ValantisSTEXLiquidityM
     fee, amount_in = liquidity_module.get_amount_in(pool_state, fixed_parameters, TOKEN_0, TOKEN_1, amount_out)
     feeInBips = (fee * 10000) / amount_in
     assert fee_in_bips_is_close_enough(feeInBips, 5)
-    assert amount_in == liquidity_module.convert_to_token_0(amount_out) + fee
+    assert amount_in == liquidity_module.convert_to_token_0(amount_out, pool_state) + fee
 
     # larger amount out
     amount_out = int(19.9999 * (10 ** 18))
     fee, amount_in = liquidity_module.get_amount_in(pool_state, fixed_parameters, TOKEN_0, TOKEN_1, amount_out)
     feeInBips = (fee * 10000) / amount_in
     assert fee_in_bips_is_close_enough(feeInBips, 5)
-    assert amount_in == liquidity_module.convert_to_token_0(amount_out) + fee
+    assert amount_in == liquidity_module.convert_to_token_0(amount_out, pool_state) + fee
     
     # even larger amount out
     amount_out = int(30 * (10 ** 18))
     fee, amount_in = liquidity_module.get_amount_in(pool_state, fixed_parameters, TOKEN_0, TOKEN_1, amount_out)
     feeInBips = (fee * 10000) / amount_in
     assert fee_in_bips_is_close_enough(feeInBips, 10)
-    assert amount_in == liquidity_module.convert_to_token_0(amount_out) + fee
+    assert amount_in == liquidity_module.convert_to_token_0(amount_out, pool_state) + fee
     
     # even larger amount out
     amount_out = int(50 * (10 ** 18))
     fee, amount_in = liquidity_module.get_amount_in(pool_state, fixed_parameters, TOKEN_0, TOKEN_1, amount_out)
     feeInBips = (fee * 10000) / amount_in
     assert fee_in_bips_is_close_enough(feeInBips, 10)
-    assert amount_in == liquidity_module.convert_to_token_0(amount_out) + fee
+    assert amount_in == liquidity_module.convert_to_token_0(amount_out, pool_state) + fee
     
 def test_get_amount_out_token1_to_token0(liquidity_module: ValantisSTEXLiquidityModule, fixed_parameters: Dict):
     """
@@ -139,11 +143,13 @@ def test_get_amount_out_token1_to_token0(liquidity_module: ValantisSTEXLiquidity
         'num_steps_token_0_fee_curve': 0,
         'amount_0_pending_unstaking': 0,
         'amount_1_pending_lp_withdrawal': 0,
-        'amount_1_lending_pool': 0
+        'amount_1_lending_pool': 0,
+        'exchange_rate_to_token_0': 1,
+        'exchange_rate_to_token_1': 1
     }
     fee, amount_out = liquidity_module.get_amount_out(pool_state, fixed_parameters, TOKEN_1, TOKEN_0, amount_in)
     assert fee == 0
-    assert amount_out == liquidity_module.convert_to_token_0(amount_in)
+    assert amount_out == liquidity_module.convert_to_token_0(amount_in, pool_state)
 
 def test_get_amount_in_token1_to_token0(liquidity_module: ValantisSTEXLiquidityModule, fixed_parameters: Dict):
     """
@@ -159,11 +165,13 @@ def test_get_amount_in_token1_to_token0(liquidity_module: ValantisSTEXLiquidityM
         'num_steps_token_0_fee_curve': 0,
         'amount_0_pending_unstaking': 0,
         'amount_1_pending_lp_withdrawal': 0,
-        'amount_1_lending_pool': 0
+        'amount_1_lending_pool': 0,
+        'exchange_rate_to_token_0': 1,
+        'exchange_rate_to_token_1': 1
     }
     fee, amount_out = liquidity_module.get_amount_in(pool_state, fixed_parameters, TOKEN_1, TOKEN_0, amount_in)
     assert fee == 0
-    assert amount_out == liquidity_module.convert_to_token_1(amount_in)
+    assert amount_out == liquidity_module.convert_to_token_1(amount_in, pool_state)
 
 def test_get_amount_in_not_enough_reserves(liquidity_module: ValantisSTEXLiquidityModule, fixed_parameters: Dict):
     """
@@ -222,7 +230,9 @@ def test_get_amount_in_no_fee(liquidity_module: ValantisSTEXLiquidityModule, fix
         'num_steps_token_0_fee_curve': 11,
         'amount_0_pending_unstaking': 0,
         'amount_1_pending_lp_withdrawal': 0,
-        'amount_1_lending_pool': 0
+        'amount_1_lending_pool': 0,
+        'exchange_rate_to_token_0': 1,
+        'exchange_rate_to_token_1': 1
     }
     fee, amount_in = liquidity_module.get_amount_in(
         pool_state=pool_state,
@@ -233,6 +243,28 @@ def test_get_amount_in_no_fee(liquidity_module: ValantisSTEXLiquidityModule, fix
     )
     assert fee == 0
     assert amount_in == amount_out
+
+def test_convert_to_token_0(liquidity_module: ValantisSTEXLiquidityModule, fixed_parameters: Dict):
+    """
+    Test that convert_to_token_0 returns the correct amount of token0 given an amount of token1.
+    """
+    amount_in = 1 * (10 ** 18)
+    pool_state = {
+        'exchange_rate_to_token_0': 1.5,
+    }
+    amount_out = liquidity_module.convert_to_token_0(amount_in, pool_state)
+    assert amount_out == amount_in * 1.5
+
+def test_convert_to_token_1(liquidity_module: ValantisSTEXLiquidityModule, fixed_parameters: Dict):
+    """
+    Test that convert_to_token_1 returns the correct amount of token1 given an amount of token0.
+    """
+    amount_in = 1 * (10 ** 18)
+    pool_state = {
+        'exchange_rate_to_token_1': 1.5,
+    }
+    amount_out = liquidity_module.convert_to_token_1(amount_in, pool_state)
+    assert amount_out == amount_in * 1.5
 
 def test_get_tvl(liquidity_module: ValantisSTEXLiquidityModule):
     reserves_token_0 = 100 * (10 ** 18)
@@ -245,9 +277,11 @@ def test_get_tvl(liquidity_module: ValantisSTEXLiquidityModule):
         'reserves_token_1': reserves_token_1,
         'amount_0_pending_unstaking': amount_0_pending_unstaking,
         'amount_1_pending_lp_withdrawal': amount_1_pending_lp_withdrawal,
-        'amount_1_lending_pool': amount_1_lending_pool
+        'amount_1_lending_pool': amount_1_lending_pool,
+        'exchange_rate_to_token_0': 1,
+        'exchange_rate_to_token_1': 1
     }
-    amount_0_pending_lp_withdrawal = liquidity_module.convert_to_token_0(amount_1_pending_lp_withdrawal)
+    amount_0_pending_lp_withdrawal = liquidity_module.convert_to_token_0(amount_1_pending_lp_withdrawal, pool_state)
     tvl = liquidity_module.get_tvl(pool_state)
     assert tvl == reserves_token_0 + reserves_token_1 + amount_0_pending_unstaking - amount_0_pending_lp_withdrawal + amount_1_lending_pool
 
